@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
-import { NewBlog } from "@/types";
+import type { NewBlog } from "@/types";
 
 interface CreateBlogFormProps {
     onSuccess: (id?: string) => void;
@@ -53,7 +53,7 @@ export function CreateBlogForm({ onSuccess, onCancel }: CreateBlogFormProps) {
     };
 
     return (
-        <div className="h-full flex flex-col items-center justify-center p-4 overflow-y-auto">
+        <div className="h-full w-full flex flex-col items-center justify-start md:justify-center p-4 overflow-y-auto">
             <Card className="w-full max-w-2xl shadow-lg border-muted">
                 <CardHeader>
                     <CardTitle className="text-2xl">Write a New Story</CardTitle>

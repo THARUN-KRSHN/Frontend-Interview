@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
 import { useBlogs } from "@/hooks/useBlogs";
-import { Blog } from "@/types";
+import type { Blog } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -41,7 +41,7 @@ export function BlogList({ onSelect, onCreate, selectedId }: BlogListProps) {
         <div className="h-full flex flex-col">
             <div className="p-4 border-b flex justify-between items-center bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
                 <h2 className="text-xl font-bold tracking-tight">Recent Posts</h2>
-                <Button size="icon" onClick={onCreate} title="Create New Post">
+                <Button size="icon" onClick={onCreate} title="Create New Post" aria-label="Create New Post">
                     <Plus className="h-5 w-5" />
                 </Button>
             </div>

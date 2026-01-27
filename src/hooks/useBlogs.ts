@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchBlogs, fetchBlog, createBlog } from "@/api/blogs";
-import { NewBlog } from "@/types";
+import type { NewBlog } from "@/types";
 
 export function useBlogs() {
     return useQuery({
