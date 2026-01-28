@@ -1,3 +1,11 @@
+/**
+ * @file App.tsx
+ * @description Main application layout component.
+ * Manages the split-view layout for BlogList and BlogDetail/Create components.
+ * Handles top-level state for selected blog and view modes.
+ * Wraps the application in QueryClientProvider for React Query context.
+ */
+
 import { useState, useCallback } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cn } from "@/lib/utils"

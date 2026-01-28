@@ -1,3 +1,9 @@
+/**
+ * @file CreateBlogForm.tsx
+ * @description Form component for creating new blog posts.
+ * Handles form state, validations, and submission using React Query mutations.
+ */
+
 import { useState } from "react";
 import { useCreateBlog } from "@/hooks/useBlogs";
 import { Button } from "@/components/ui/button";
@@ -7,13 +13,21 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/componen
 import type { NewBlog } from "@/types";
 
 interface CreateBlogFormProps {
+    /** Callback on successful creation */
     onSuccess: (id?: string) => void;
+    /** Callback to cancel creation */
     onCancel: () => void;
 }
 
+/**
+ * CreateBlogForm Component
+ * A controlled form to input blog details.
+ */
 export function CreateBlogForm({ onSuccess, onCancel }: CreateBlogFormProps) {
+    // Mutation hook to create blog
     const { mutate, isPending } = useCreateBlog();
 
+    // Local state for form fields
     const [formData, setFormData] = useState<NewBlog>({
         title: "",
         category: [],
@@ -25,13 +39,16 @@ export function CreateBlogForm({ onSuccess, onCancel }: CreateBlogFormProps) {
 
     const [categoryInput, setCategoryInput] = useState("");
 
+    // Generic handler for text inputs
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
     };
 
+    // Handler to add categories on 'Enter' key press
     const handleCategoryAdd = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && categoryInput.trim()) {
             e.preventDefault();
+            // Prevent duplicates
             if (!formData.category.includes(categoryInput.trim())) {
                 setFormData(prev => ({ ...prev, category: [...prev.category, categoryInput.trim()] }));
             }
@@ -39,12 +56,15 @@ export function CreateBlogForm({ onSuccess, onCancel }: CreateBlogFormProps) {
         }
     };
 
+    // Remove a category tag
     const removeCategory = (cat: string) => {
         setFormData(prev => ({ ...prev, category: prev.category.filter(c => c !== cat) }));
     };
 
+    // Form submission handler
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        // Trigger mutation with current date
         mutate({ ...formData, date: new Date().toISOString() }, {
             onSuccess: () => {
                 onSuccess();
@@ -60,6 +80,7 @@ export function CreateBlogForm({ onSuccess, onCancel }: CreateBlogFormProps) {
                 </CardHeader>
                 <form onSubmit={handleSubmit}>
                     <CardContent className="space-y-4">
+                        {/* Title Input */}
                         <div className="space-y-2">
                             <label htmlFor="title" className="text-sm font-medium">Title</label>
                             <Input
@@ -72,6 +93,7 @@ export function CreateBlogForm({ onSuccess, onCancel }: CreateBlogFormProps) {
                             />
                         </div>
 
+                        {/* Cover Image URL Input */}
                         <div className="space-y-2">
                             <label htmlFor="coverImage" className="text-sm font-medium">Cover Image URL</label>
                             <Input
@@ -83,6 +105,7 @@ export function CreateBlogForm({ onSuccess, onCancel }: CreateBlogFormProps) {
                             />
                         </div>
 
+                        {/* Categories List Input (Tag system) */}
                         <div className="space-y-2">
                             <label htmlFor="category" className="text-sm font-medium">Categories (Press Enter to add)</label>
                             <Input
@@ -102,6 +125,7 @@ export function CreateBlogForm({ onSuccess, onCancel }: CreateBlogFormProps) {
                             </div>
                         </div>
 
+                        {/* Short Description */}
                         <div className="space-y-2">
                             <label htmlFor="description" className="text-sm font-medium">Short Description</label>
                             <Textarea
@@ -115,6 +139,7 @@ export function CreateBlogForm({ onSuccess, onCancel }: CreateBlogFormProps) {
                             />
                         </div>
 
+                        {/* Main Content */}
                         <div className="space-y-2">
                             <label htmlFor="content" className="text-sm font-medium">Content</label>
                             <Textarea
