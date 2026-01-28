@@ -4,17 +4,20 @@
  * Handles fetching specific blog data, loading skeletons, and error states.
  */
 
-import { ArrowLeft } from "lucide-react";
-import { useBlog } from "@/hooks/useBlogs";
+import { ArrowLeft, Edit, Trash2 } from "lucide-react";
+import { useBlog, useDeleteBlog } from "@/hooks/useBlogs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 interface BlogDetailProps {
     /** ID of the blog to fetch and display */
     id: string;
     /** Callback to go back to the list view (used mainly on mobile) */
     onBack?: () => void;
+    /** Callback to edit the current blog */
+    onEdit: (blog: any) => void;
 }
 
 /**
@@ -22,9 +25,23 @@ interface BlogDetailProps {
  * Fetches and renders the details of a blog post.
  * Uses 'useBlog' hook for data fetching.
  */
-export function BlogDetail({ id, onBack }: BlogDetailProps) {
+export function BlogDetail({ id, onBack, onEdit }: BlogDetailProps) {
     // Data fetching hook - auto-triggers when 'id' changes
     const { data: blog, isLoading, isError } = useBlog(id);
+    const { mutate: deleteBlogMutate, isPending: isDeleting } = useDeleteBlog();
+
+    // Handle Delete
+    const handleDelete = () => {
+        if (confirm("Are you sure you want to delete this story?")) {
+            deleteBlogMutate(id, {
+                onSuccess: () => {
+                    toast.success("Story deleted successfully");
+                    if (onBack) onBack();
+                },
+                onError: () => toast.error("Failed to delete story"),
+            });
+        }
+    };
 
     // LOADING STATE: Show skeletons while data is being fetched
     if (isLoading) {
@@ -65,17 +82,19 @@ export function BlogDetail({ id, onBack }: BlogDetailProps) {
         <div className="h-full overflow-y-auto bg-background">
             <div className="max-w-4xl mx-auto min-h-full pb-10">
                 {/* Hero Section with Cover Image */}
-                <div className="relative w-full h-64 md:h-80 overflow-hidden group">
+                <div className="relative w-full h-64 md:h-80 overflow-hidden group bg-black/10"> {/* Added bg for loading contrast */}
                     <img
                         src={blog.coverImage}
                         alt={blog.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90"
                         onError={(e) => {
                             // Fallback image if source fails
                             (e.target as HTMLImageElement).src = 'https://placehold.co/800x400?text=No+Image';
                         }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-black/30 opacity-80" />
+
+                    {/* Darker Gradient Overlay for better text visibility */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-black/10 opacity-100" />
 
                     {/* Back Button for Mobile */}
                     {onBack && (
@@ -91,8 +110,29 @@ export function BlogDetail({ id, onBack }: BlogDetailProps) {
                         </div>
                     )}
 
+                    {/* Action Buttons (Edit/Delete) */}
+                    <div className="absolute top-4 right-4 z-20 flex gap-2">
+                        <Button
+                            size="icon"
+                            variant="secondary"
+                            className="bg-background/50 hover:bg-background/80 backdrop-blur-md"
+                            onClick={() => onEdit(blog)}
+                        >
+                            <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                            size="icon"
+                            variant="destructive"
+                            className="bg-destructive/80 hover:bg-destructive shadow-sm"
+                            onClick={handleDelete}
+                            disabled={isDeleting}
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </div>
+
                     {/* Title and Metadata Overlay */}
-                    <div className="absolute bottom-0 left-0 p-6 md:p-8 w-full">
+                    <div className="absolute bottom-0 left-0 p-6 md:p-8 w-full z-10">
                         <div className="flex gap-2 mb-3 md:mb-4 flex-wrap">
                             {blog.category.map(cat => (
                                 <Badge key={cat} variant="secondary" className="bg-primary/90 hover:bg-primary text-primary-foreground backdrop-blur-sm border-none shadow-sm">

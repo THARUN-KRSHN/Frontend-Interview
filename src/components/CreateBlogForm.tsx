@@ -1,31 +1,38 @@
 /**
  * @file CreateBlogForm.tsx
- * @description Form component for creating new blog posts.
+ * @description Form component for creating and editing blog posts.
  * Handles form state, validations, and submission using React Query mutations.
  */
 
-import { useState } from "react";
-import { useCreateBlog } from "@/hooks/useBlogs";
+import { useState, useEffect } from "react";
+import { useCreateBlog, useUpdateBlog } from "@/hooks/useBlogs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
-import type { NewBlog } from "@/types";
+import { toast } from "sonner";
+import type { NewBlog, Blog } from "@/types";
 
-interface CreateBlogFormProps {
-    /** Callback on successful creation */
+interface BlogFormProps {
+    /** Optional initial data for editing an existing blog */
+    initialData?: Blog;
+    /** Callback on successful creation/update */
     onSuccess: (id?: string) => void;
-    /** Callback to cancel creation */
+    /** Callback to cancel operation */
     onCancel: () => void;
 }
 
 /**
- * CreateBlogForm Component
- * A controlled form to input blog details.
+ * BlogForm Component
+ * A controlled form to input blog details. Supports both Create and Edit modes.
  */
-export function CreateBlogForm({ onSuccess, onCancel }: CreateBlogFormProps) {
-    // Mutation hook to create blog
-    const { mutate, isPending } = useCreateBlog();
+export function CreateBlogForm({ initialData, onSuccess, onCancel }: BlogFormProps) {
+    // Mutation hooks
+    const { mutate: createMutate, isPending: isCreating } = useCreateBlog();
+    const { mutate: updateMutate, isPending: isUpdating } = useUpdateBlog();
+
+    const isEditing = !!initialData;
+    const isPending = isCreating || isUpdating;
 
     // Local state for form fields
     const [formData, setFormData] = useState<NewBlog>({
@@ -38,6 +45,20 @@ export function CreateBlogForm({ onSuccess, onCancel }: CreateBlogFormProps) {
     });
 
     const [categoryInput, setCategoryInput] = useState("");
+
+    // Initialize form data if editing
+    useEffect(() => {
+        if (initialData) {
+            setFormData({
+                title: initialData.title,
+                category: initialData.category,
+                description: initialData.description,
+                content: initialData.content,
+                coverImage: initialData.coverImage,
+                date: initialData.date,
+            });
+        }
+    }, [initialData]);
 
     // Generic handler for text inputs
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -64,19 +85,33 @@ export function CreateBlogForm({ onSuccess, onCancel }: CreateBlogFormProps) {
     // Form submission handler
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // Trigger mutation with current date
-        mutate({ ...formData, date: new Date().toISOString() }, {
-            onSuccess: () => {
-                onSuccess();
-            }
-        });
+
+        if (isEditing && initialData) {
+            // Update existing blog
+            updateMutate({ id: initialData.id, data: { ...formData } }, {
+                onSuccess: () => {
+                    toast.success("Story updated successfully");
+                    onSuccess(initialData.id);
+                },
+                onError: () => toast.error("Failed to update story"),
+            });
+        } else {
+            // Create new blog
+            createMutate({ ...formData, date: new Date().toISOString() }, {
+                onSuccess: () => {
+                    toast.success("New story published!");
+                    onSuccess();
+                },
+                onError: () => toast.error("Failed to publish story"),
+            });
+        }
     };
 
     return (
         <div className="h-full w-full flex flex-col items-center justify-start md:justify-center p-4 overflow-y-auto">
             <Card className="w-full max-w-2xl shadow-lg border-muted">
                 <CardHeader>
-                    <CardTitle className="text-2xl">Write a New Story</CardTitle>
+                    <CardTitle className="text-2xl">{isEditing ? "Edit Story" : "Write a New Story"}</CardTitle>
                 </CardHeader>
                 <form onSubmit={handleSubmit}>
                     <CardContent className="space-y-4">
@@ -156,7 +191,7 @@ export function CreateBlogForm({ onSuccess, onCancel }: CreateBlogFormProps) {
                     <CardFooter className="flex justify-end gap-2 bg-muted/20 p-6">
                         <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
                         <Button type="submit" disabled={isPending}>
-                            {isPending ? "Publishing..." : "Publish Story"}
+                            {isPending ? "Saving..." : (isEditing ? "Update Story" : "Publish Story")}
                         </Button>
                     </CardFooter>
                 </form>

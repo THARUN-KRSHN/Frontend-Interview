@@ -37,6 +37,12 @@ export async function fetchBlog(id: string): Promise<Blog> {
  * @returns {Promise<Blog>} A promise resolving to the created Blog object including its new ID.
  * @throws {Error} If the creation request fails.
  */
+/**
+ * Creates a new blog post.
+ * @param {NewBlog} blog - The blog data to create (excluding ID).
+ * @returns {Promise<Blog>} A promise resolving to the created Blog object including its new ID.
+ * @throws {Error} If the creation request fails.
+ */
 export async function createBlog(blog: NewBlog): Promise<Blog> {
     const res = await fetch(API_URL, {
         method: "POST",
@@ -45,4 +51,34 @@ export async function createBlog(blog: NewBlog): Promise<Blog> {
     });
     if (!res.ok) throw new Error("Failed to create blog");
     return res.json();
+}
+
+/**
+ * Updates an existing blog post.
+ * @param {string} id - The ID of the blog to update.
+ * @param {Partial<NewBlog>} blog - The blog data to update.
+ * @returns {Promise<Blog>} A promise resolving to the updated Blog object.
+ * @throws {Error} If the update request fails.
+ */
+export async function updateBlog(id: string, blog: Partial<NewBlog>): Promise<Blog> {
+    const res = await fetch(`${API_URL}/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(blog),
+    });
+    if (!res.ok) throw new Error("Failed to update blog");
+    return res.json();
+}
+
+/**
+ * Deletes a blog post.
+ * @param {string} id - The ID of the blog to delete.
+ * @returns {Promise<void>} A promise resolving when the deletion is complete.
+ * @throws {Error} If the deletion request fails.
+ */
+export async function deleteBlog(id: string): Promise<void> {
+    const res = await fetch(`${API_URL}/${id}`, {
+        method: "DELETE",
+    });
+    if (!res.ok) throw new Error("Failed to delete blog");
 }

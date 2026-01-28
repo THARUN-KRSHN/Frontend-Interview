@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils"
 import { BlogList } from './components/BlogList'
 import { BlogDetail } from './components/BlogDetail'
 import { CreateBlogForm } from './components/CreateBlogForm'
+import { Toaster } from "sonner"
+import type { Blog } from "@/types"
 
 // Create a client
 const queryClient = new QueryClient({
@@ -27,7 +29,8 @@ const queryClient = new QueryClient({
 
 function App() {
   const [selectedBlogId, setSelectedBlogId] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<'detail' | 'create'>('detail')
+  const [viewMode, setViewMode] = useState<'detail' | 'create' | 'edit'>('detail')
+  const [blogToEdit, setBlogToEdit] = useState<Blog | undefined>(undefined)
 
   // Memoize handlers to prevent passing new functions to child components on every render
   const handleSelectBlog = useCallback((id: string) => {
@@ -37,20 +40,32 @@ function App() {
 
   const handleCreateNew = useCallback(() => {
     setSelectedBlogId(null)
+    setBlogToEdit(undefined)
     setViewMode('create')
+  }, [])
+
+  const handleEditBlog = useCallback((blog: Blog) => {
+    setBlogToEdit(blog)
+    setViewMode('edit')
   }, [])
 
   const handleBackToList = useCallback(() => {
     setSelectedBlogId(null)
+    setBlogToEdit(undefined)
     setViewMode('detail')
   }, [])
 
-  const handleCreateSuccess = useCallback(() => {
-    setViewMode('detail')
-    setSelectedBlogId(null)
+  const handleCreateSuccess = useCallback((id?: string) => {
+    setBlogToEdit(undefined)
+    if (id) {
+      setSelectedBlogId(id)
+      setViewMode('detail')
+    } else {
+      setViewMode('detail')
+    }
   }, [])
 
-  const isContentActive = !!selectedBlogId || viewMode === 'create'
+  const isContentActive = !!selectedBlogId || viewMode === 'create' || viewMode === 'edit'
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -73,8 +88,9 @@ function App() {
           "flex-1 h-full bg-background relative will-change-contents",
           !isContentActive ? "hidden md:block" : "block"
         )}>
-          {viewMode === 'create' ? (
+          {viewMode === 'create' || viewMode === 'edit' ? (
             <CreateBlogForm
+              initialData={blogToEdit}
               onSuccess={handleCreateSuccess}
               onCancel={handleBackToList}
             />
@@ -83,6 +99,7 @@ function App() {
               <BlogDetail
                 id={selectedBlogId}
                 onBack={handleBackToList}
+                onEdit={handleEditBlog}
               />
             ) : (
               <div className="h-full flex flex-col items-center justify-center p-8 text-center space-y-4 animate-in fade-in duration-500">
@@ -100,6 +117,7 @@ function App() {
           )}
         </div>
       </div>
+      <Toaster />
     </QueryClientProvider>
   )
 }

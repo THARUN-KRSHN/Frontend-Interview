@@ -5,7 +5,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchBlogs, fetchBlog, createBlog } from "@/api/blogs";
+import { fetchBlogs, fetchBlog, createBlog, updateBlog, deleteBlog } from "@/api/blogs";
 import type { NewBlog } from "@/types";
 
 /**
@@ -52,6 +52,39 @@ export function useCreateBlog() {
         mutationFn: (newBlog: NewBlog) => createBlog(newBlog),
         onSuccess: () => {
             // Invalidate and refetch the blogs list to show the new entry immediately
+            queryClient.invalidateQueries({ queryKey: ["blogs"] });
+        },
+    });
+}
+
+/**
+ * Hook to update an existing blog post.
+ * @returns Mutation result object.
+ * 
+ * Invalidation: Invalidates ["blogs"] and specific ["blog", id] to refresh data.
+ */
+export function useUpdateBlog() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, data }: { id: string; data: Partial<NewBlog> }) => updateBlog(id, data),
+        onSuccess: (data, variables) => {
+            queryClient.invalidateQueries({ queryKey: ["blogs"] });
+            queryClient.invalidateQueries({ queryKey: ["blog", variables.id] });
+        },
+    });
+}
+
+/**
+ * Hook to delete a blog post.
+ * @returns Mutation result object.
+ * 
+ * Invalidation: Invalidates ["blogs"] list.
+ */
+export function useDeleteBlog() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => deleteBlog(id),
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["blogs"] });
         },
     });
