@@ -82,82 +82,92 @@ export function BlogDetail({ id, onBack, onEdit }: BlogDetailProps) {
         <div className="h-full overflow-y-auto bg-background">
             <div className="max-w-4xl mx-auto min-h-full pb-10">
                 {/* Hero Section with Cover Image */}
-                <div className="relative w-full h-64 md:h-80 overflow-hidden group bg-black/10"> {/* Added bg for loading contrast */}
+                <div className="relative w-full h-64 md:h-80 overflow-hidden group bg-muted">
                     <img
                         src={blog.coverImage}
                         alt={blog.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90"
+                        className="w-full h-full object-cover opacity-90"
                         onError={(e) => {
                             // Fallback image if source fails
                             (e.target as HTMLImageElement).src = 'https://placehold.co/800x400?text=No+Image';
                         }}
                     />
 
-                    {/* Darker Gradient Overlay for better text visibility */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-black/10 opacity-100" />
+                    {/* Gradient Overlay for text visibility */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
 
-                    {/* Back Button for Mobile */}
+                    {/* Back Button for Mobile - Top Left */}
                     {onBack && (
                         <div className="absolute top-4 left-4 z-20 md:hidden">
                             <Button
                                 variant="secondary"
                                 size="sm"
                                 onClick={onBack}
-                                className="bg-background/50 hover:bg-background/80 backdrop-blur-md border border-white/10 text-foreground"
+                                className="bg-background/80 hover:bg-background/90 backdrop-blur-md shadow-sm"
                             >
                                 <ArrowLeft className="h-4 w-4 mr-1" /> Back
                             </Button>
                         </div>
                     )}
 
-                    {/* Action Buttons (Edit/Delete) */}
-                    <div className="absolute top-4 right-4 z-20 flex gap-2">
-                        <Button
-                            size="icon"
-                            variant="secondary"
-                            className="bg-background/50 hover:bg-background/80 backdrop-blur-md"
-                            onClick={() => onEdit(blog)}
-                        >
-                            <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                            size="icon"
-                            variant="destructive"
-                            className="bg-destructive/80 hover:bg-destructive shadow-sm"
-                            onClick={handleDelete}
-                            disabled={isDeleting}
-                        >
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
-                    </div>
-
                     {/* Title and Metadata Overlay */}
-                    <div className="absolute bottom-0 left-0 p-6 md:p-8 w-full z-10">
-                        <div className="flex gap-2 mb-3 md:mb-4 flex-wrap">
+                    <div className="absolute bottom-0 left-0 p-6 md:p-10 w-full z-10">
+                        <div className="flex gap-2 mb-4 flex-wrap">
                             {blog.category.map(cat => (
-                                <Badge key={cat} variant="secondary" className="bg-primary/90 hover:bg-primary text-primary-foreground backdrop-blur-sm border-none shadow-sm">
+                                <Badge key={cat} className="bg-primary hover:bg-primary/90 text-primary-foreground border-none px-3 py-1 text-xs uppercase tracking-wider shadow-sm">
                                     {cat}
                                 </Badge>
                             ))}
                         </div>
-                        <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground mb-2 drop-shadow-sm leading-tight md:leading-tight">
+                        <h1 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-foreground mb-3 drop-shadow-sm leading-tight">
                             {blog.title}
                         </h1>
-                        <p className="text-muted-foreground font-medium flex items-center gap-2 text-sm md:text-base">
-                            {new Date(blog.date).toLocaleDateString(undefined, { dateStyle: 'long' })}
-                        </p>
+                        <div className="flex items-center justify-between text-muted-foreground font-medium text-sm md:text-base">
+                            <div className="flex items-center gap-2">
+                                <span>{new Date(blog.date).toLocaleDateString(undefined, { dateStyle: 'long' })}</span>
+                                <span>•</span>
+                                <span>5 min read</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                {/* Content Section */}
-                <div className="p-6 md:p-12 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className="prose prose-zinc dark:prose-invert max-w-none prose-p:text-base md:prose-p:text-lg">
-                        {/* Description / Subtitle */}
-                        <p className="text-lg md:text-xl leading-relaxed text-muted-foreground border-l-4 border-primary/50 pl-6 italic">
-                            {blog.description}
-                        </p>
+                {/* Main Content Area */}
+                <div className="px-6 md:px-10 py-6 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+                    {/* Toolbar: Edit/Delete on the right */}
+                    <div className="flex justify-end gap-3 border-b pb-4">
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => onEdit(blog)}
+                                className="gap-2 text-muted-foreground hover:text-foreground"
+                            >
+                                <Edit className="h-4 w-4" /> Edit Story
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleDelete}
+                                disabled={isDeleting}
+                                className="gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/20"
+                            >
+                                <Trash2 className="h-4 w-4" /> Delete
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div className="prose prose-zinc dark:prose-invert max-w-none prose-p:text-base md:prose-p:text-lg prose-headings:font-bold">
+                        {/* Featured Quote / Description Style - Matches user request */}
+                        <div className="not-prose my-8 p-6 md:p-8 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-600 rounded-r-lg">
+                            <p className="text-lg md:text-xl font-medium text-blue-900 dark:text-blue-100 italic leading-relaxed">
+                                "{blog.description}"
+                            </p>
+                        </div>
+
                         {/* Main Body Content */}
-                        <div className="mt-8 text-foreground/90 leading-7 md:leading-8 whitespace-pre-wrap font-serif text-base md:text-lg">
+                        <div className="mt-8 text-foreground/90 leading-8 whitespace-pre-wrap font-serif text-lg md:text-xl">
                             {blog.content}
                         </div>
                     </div>
