@@ -160,8 +160,8 @@ export function BlogDetail({ id, onBack, onEdit }: BlogDetailProps) {
 
                     <div className="prose prose-zinc dark:prose-invert max-w-none prose-p:text-base md:prose-p:text-lg prose-headings:font-bold">
                         {/* Featured Quote / Description Style - Matches user request */}
-                        <div className="not-prose my-8 p-6 md:p-8 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-600 rounded-r-lg">
-                            <p className="text-lg md:text-xl font-medium text-blue-900 dark:text-blue-100 italic leading-relaxed">
+                        <div className="not-prose my-8 p-6 md:p-8 bg-blue-50 dark:bg-blue-950/30 border-l-4 border-blue-600 rounded-r-lg shadow-sm">
+                            <p className="text-lg md:text-xl font-medium text-slate-800 dark:text-slate-200 italic leading-relaxed">
                                 "{blog.description}"
                             </p>
                         </div>
